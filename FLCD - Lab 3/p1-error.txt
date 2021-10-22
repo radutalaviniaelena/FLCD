@@ -1,0 +1,16 @@
+main () { 
+	_first, _second: Integer; 
+	read >> _first >> _second; 
+	maxim: Integer = -1;
+	text: String = "";
+
+	if (_first > _second) {
+		_maxim = _first;
+	} else {
+		_maxim = _second;
+	}
+
+	text = text + The maximum number is + _maxim;
+	
+	write >> _maxim;
+}

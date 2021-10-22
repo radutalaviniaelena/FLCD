@@ -1,0 +1,13 @@
+main () {
+	_first, _second: Integer; 
+	read >> _first >> _second; 
+	_maxim: Integer = -1;
+
+	if (_first > _second) {
+		_maxim = _first;
+	} else {
+		_maxim = _second;
+	}
+
+	write << _maxim;
+}
