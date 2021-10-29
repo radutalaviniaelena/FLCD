@@ -51,17 +51,32 @@ public class Scanner {
             // we check if the next token is an identifier or a constant
             boolean validIdentifierOrConstant = false;
 
+
             if(line.charAt(index) == '_' && (index + 1) < line.length() && Character.isLetter(line.charAt(index + 1))) {
                 index = treatIdentifier(line, index);
                 validIdentifierOrConstant = true;
             }
 
-            if(Character.isDigit(line.charAt(index)) ||
-                    (line.charAt(index) == '-' &&
-                            (index + 1) < line.length() && Character.isDigit(line.charAt(index + 1)))) {
-                index = treatIntegerConstant(line, index);
-                validIdentifierOrConstant = true;
+            if((line.charAt(index) == '-' || line.charAt(index) == '+') &&
+                    (index + 1) < line.length() && line.charAt(index + 1) == '0') {
+                throw new Exception("Lexical error: a number cannot start with 0. Line: " + this.currentLine);
             }
+            if(line.charAt(index) == '0' &&  (index + 1) < line.length() && Character.isDigit(line.charAt(index + 1))) {
+                throw new Exception("Lexical error: a number cannot start with 0. Line: " + this.currentLine);
+            }
+
+            boolean expressionInsteadOfNumber = (line.charAt(index) == '-' || line.charAt(index) == '+') &&
+                    (index + 1) < line.length() && Character.isDigit(line.charAt(index + 1)) && !PIF.isEmpty();
+            expressionInsteadOfNumber = expressionInsteadOfNumber && (PIF.get(PIF.size() - 1).first.equals("ident") ||
+                    PIF.get(PIF.size() - 1).first.equals("const"));
+
+            if (!expressionInsteadOfNumber)
+                if(Character.isDigit(line.charAt(index)) ||
+                        ((line.charAt(index) == '-' || line.charAt(index) == '+') &&
+                                (index + 1) < line.length() && Character.isDigit(line.charAt(index + 1)))) {
+                    index = treatIntegerConstant(line, index);
+                    validIdentifierOrConstant = true;
+                }
 
             if(line.charAt(index) == '"') {
                 index = treatStringConstant(line, index);
@@ -105,15 +120,17 @@ public class Scanner {
 
     private int treatCharacterConstant(String line, int index) throws Exception {
         System.out.println("Character Constant - index: " + index);
+
+        StringBuilder character = new StringBuilder();
+        character.append(line.charAt(index));
         index++;
 
         if(index < line.length() && !Character.isLetterOrDigit(line.charAt(index))) {
             throw new Exception("Lexical error: characters must be digits or letters. Line: " + this.currentLine);
         }
 
-        char character = 0;
         if(index < line.length() && line.charAt(index) != '\'') {
-            character = line.charAt(index);
+            character.append(line.charAt(index));
         }
 
         if(index == line.length()) {
@@ -121,26 +138,32 @@ public class Scanner {
         }
 
         index++;
-        System.out.println("Character Constant: " + character + "\n");
+        character.append(line.charAt(index));
+        index++;
         addToPIFAndST(String.valueOf(character), "const");
+
+        System.out.println("Character Constant: " + character + "\n");
         return index;
     }
 
     private int treatStringConstant(String line, int index) throws Exception {
         System.out.println("String Constant - index: " + index);
+
+        StringBuilder string = new StringBuilder();
+        string.append(line.charAt(index));
         index++;
 
         boolean ok = true;
-        StringBuilder string = new StringBuilder();
-        while(index < line.length() && line.charAt(index) != '"') {
+        while(index < line.length() && line.charAt(index) != '"' && ok) {
             string.append(line.charAt(index));
-            if(!Character.isLetterOrDigit(line.charAt(index))) {
+            if(!Character.isLetterOrDigit(line.charAt(index)) && !Character.isSpaceChar(line.charAt(index))) {
                 ok = false;
             }
             index++;
         }
 
         if(!ok) {
+            System.out.println(index);
             throw new Exception("Lexical error: strings must contain digits and/or letters. Line: " + this.currentLine);
         }
 
@@ -148,17 +171,20 @@ public class Scanner {
             throw new Exception("Lexical error: unclosed quotes for strings. Line: " + this.currentLine);
         }
 
+        string.append(line.charAt(index));
         index++;
-        System.out.println("String Constant: " + string + "\n");
         addToPIFAndST(string.toString(), "const");
+
+        System.out.println("String Constant: " + string + "\n");
         return index;
     }
 
-    private int treatIntegerConstant(String line, int index) {
+    private int treatIntegerConstant(String line, int index) throws Exception {
         System.out.println("Integer Constant - index: " + index);
         int sign = 1;
-        if(line.charAt(index) == '-') {
-            sign = -1;
+        if(line.charAt(index) == '-' || line.charAt(index) == '+') {
+            if (line.charAt(index) == '-')
+                sign = -1;
             index++;
         }
 
