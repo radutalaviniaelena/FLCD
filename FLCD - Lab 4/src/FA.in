@@ -1,9 +1,9 @@
 7
 p q x r w y z
 p
-2
-y z
-8
+3
+p y z
+9
 p q 1
 p q e
 q x a
@@ -12,3 +12,4 @@ x y b
 r y 6
 y y d
 r z c
+q x a

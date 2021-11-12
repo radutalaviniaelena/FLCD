@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-class Pair<T1> {
+class Triple<T1> {
     public T1 firstState;
     public T1 secondState;
     public T1 value;
 
-    public Pair(T1 firstState, T1 secondState, T1 value) {
+    public Triple(T1 firstState, T1 secondState, T1 value) {
         this.firstState = firstState;
         this.secondState = secondState;
         this.value = value;
@@ -25,8 +25,19 @@ public class Main {
     private static Set<String> states;
     private static Set<String> alphabet;
     private static Set<String> finalStates;
-    private static List<Pair<String>> transitions;
+    private static List<Triple<String>> transitions;
     private static String initialState;
+
+    private static boolean verifyIfTransitionExist(Triple<String> triple) {
+        for(Triple<String> transition: transitions) {
+            if(transition.firstState.equals(triple.firstState)
+                    && transition.secondState.equals(triple.secondState) && transition.value.equals(triple.value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static int getNumber(BufferedReader reader, int number) throws IOException {
         String value;
@@ -58,9 +69,11 @@ public class Main {
             String[] values;
             for(int i = 0; i < numberOfTransitions; ++i) {
                 values = reader.readLine().split(" ");
-                Pair<String> pair = new Pair<>(values[0], values[1], values[2]);
-                transitions.add(pair);
-                alphabet.add(values[2]);
+                Triple<String> triple = new Triple<>(values[0], values[1], values[2]);
+                if(!verifyIfTransitionExist(triple)) {
+                    transitions.add(triple);
+                    alphabet.add(values[2]);
+                }
             }
         } catch(IOException ioException) {
             ioException.printStackTrace();
@@ -70,7 +83,7 @@ public class Main {
     public static String getSecondStateBy(String firstState, String value) {
         String secondState = "";
 
-        for (Pair<String> transition : transitions) {
+        for (Triple<String> transition : transitions) {
             if (transition.firstState.equals(firstState) && transition.value.equals(value)) {
                 secondState = transition.secondState;
                 break;
@@ -84,7 +97,7 @@ public class Main {
         for(String state: states) {
            List<String> values = new ArrayList<>();
 
-            for(Pair<String> transition: transitions) {
+            for(Triple<String> transition: transitions) {
                 if(transition.firstState.equals(state)) {
                     values.add(transition.value);
                 }
