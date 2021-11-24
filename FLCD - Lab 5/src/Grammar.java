@@ -1,13 +1,12 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
 public class Grammar {
-    private Set<String> terminals;
-    private Set<String> nonTerminals;
-    private Map<String, Set<String>> productions;
+    private final Set<String> terminals;
+    private final Set<String> nonTerminals;
+    private final Map<String, Set<String>> productions;
     private String startSymbol;
     private boolean isCFG;
 
@@ -23,6 +22,22 @@ public class Grammar {
         return isCFG;
     }
 
+    public Set<String> getTerminals() {
+        return terminals;
+    }
+
+    public Set<String> getNonTerminals() {
+        return nonTerminals;
+    }
+
+    public String getStartSymbol() {
+        return startSymbol;
+    }
+
+    public Map<String, Set<String>> getProductions() {
+        return productions;
+    }
+
     private int getNumber(BufferedReader reader, int number) throws IOException {
         String value;
         value = reader.readLine();
@@ -30,15 +45,6 @@ public class Grammar {
             number = number * 10 + (value.charAt(i) - '0');
         }
         return number;
-    }
-
-    private void extractFromFile(BufferedReader reader, int number, Set<String> set) throws IOException {
-        number = getNumber(reader, number);
-        /*set.addAll(Arrays.asList(reader.readLine().split(" ")).subList(0, number));*/
-        String[] values = reader.readLine().split(" ");
-        for(String value: values) {
-            set.add(value);
-        }
     }
 
     public void readGrammarFromFile(String filePath) {
@@ -49,8 +55,15 @@ public class Grammar {
 
             int numberOfTerminals = 0, numberOfNonTerminals = 0, numberOfProductions = 0;
 
-            extractFromFile(reader, numberOfNonTerminals, this.nonTerminals);
-            extractFromFile(reader, numberOfTerminals, this.terminals);
+            numberOfNonTerminals = getNumber(reader, numberOfNonTerminals);
+            for(int i = 0; i < numberOfNonTerminals; ++i) {
+                this.nonTerminals.add(reader.readLine());
+            }
+
+            numberOfTerminals = getNumber(reader, numberOfTerminals);
+            for(int i = 0; i < numberOfTerminals; ++i) {
+                this.terminals.add(reader.readLine());
+            }
 
             numberOfProductions = getNumber(reader, numberOfProductions);
             String[] values;
@@ -58,7 +71,7 @@ public class Grammar {
                 values = reader.readLine().split(" -> ");
                 String key = values[0], value = values[1];
 
-                if(key.length() != 1 || !this.nonTerminals.contains(key)) {
+                if(!this.nonTerminals.contains(key)) {
                     this.isCFG = false;
                 }
 
@@ -67,8 +80,6 @@ public class Grammar {
                 }
                 this.productions.get(key).add(value);
             }
-
-            System.out.println(this.productions);
 
             this.startSymbol = reader.readLine();
         } catch (IOException ioException) {
@@ -82,19 +93,38 @@ public class Grammar {
 
     public String printProductions() {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n");
+
         for(Map.Entry<String, Set<String>> entry: this.productions.entrySet()) {
             stringBuilder.append(entry.getKey()).append(" -> ");
 
             int i = 0;
             for(String value: entry.getValue()) {
                 stringBuilder.append(value);
-                if(i < (value.length() - 1)) {
+                if(i < (entry.getValue().size() - 1)) {
                     stringBuilder.append(" | ");
                     i++;
                 }
             }
 
-            stringBuilder.append(", ");
+            stringBuilder.append("\n");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public String printProductionsForNonTerminal(String nonTerminal) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n");
+
+        int i = 0;
+        Set<String> values = this.getProductionForNonTerminal(nonTerminal);
+        for(String value: values) {
+            stringBuilder.append(value);
+            if(i < (values.size() - 1)) {
+                stringBuilder.append(" | ");
+                i++;
+            }
         }
 
         return stringBuilder.toString();
@@ -103,11 +133,11 @@ public class Grammar {
     @Override
     public String toString() {
         return "Grammar{" +
-                "terminals=" + terminals +
-                ", nonTerminals=" + nonTerminals +
-                ", productions=" + printProductions() +
-                ", startSymbol='" + startSymbol + '\'' +
-                ", isCFG=" + isCFG +
+                "terminals = " + terminals +
+                ", nonTerminals = " + nonTerminals +
+                ", productions = " + printProductions() +
+                ", startSymbol = '" + startSymbol + '\'' +
+                ", isCFG = " + isCFG +
                 '}';
     }
 }

@@ -1,13 +1,19 @@
 5
-S A B C D
+S
+A
+B
+C
+D
 3
-a b c
+a
+b
+c
 8
-S -> aA
-S -> Ba
-A -> aCb
+S -> a A
+S -> B a
+A -> a C b
 A -> D
-B -> bA
+B -> b A
 B -> D
 C -> epsilon
 D -> c
